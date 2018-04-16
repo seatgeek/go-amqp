@@ -14,6 +14,8 @@ before_install:
   - go get github.com/kardianos/govendor
   - go get github.com/onsi/ginkgo/ginkgo
   - sudo rabbitmq-plugins enable rabbitmq_management
+  - sudo wget http://guest:guest@localhost:15672/cli/rabbitmqadmin -O /usr/local/bin/rabbitmqadmin
+  - sudo chmod +x /usr/local/bin/rabbitmqadmin
   - rabbitmqadmin declare exchange name=test type=direct
   - rabbitmqadmin declare queue name=test durable=false
   - rabbitmqadmin declare binding source="test" destination_type="queue" destination="test" routing_key="test"
