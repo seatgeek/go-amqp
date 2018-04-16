@@ -76,9 +76,6 @@ func (a *AMQPConnection) PublishWithOptions(exchange, routingKey, body string, o
 
 	channel := a.channel
 
-	// Setup acknowledgement
-	ack, nack := channel.NotifyConfirm(make(chan uint64, 1), make(chan uint64, 1))
-
 	contentType := "text/plain"
 	contentEnconding := "UTF-8"
 	messageBody := []byte(body)
@@ -123,21 +120,6 @@ func (a *AMQPConnection) PublishWithOptions(exchange, routingKey, body string, o
 	); err != nil {
 		err = fmt.Errorf("Couldn't publish AMQP message: %s", err)
 		log.WithFields(log.Fields{"logger": "amqp"}).Errorf("%v", err)
-		return err
-	}
-
-	// Acknowledge
-	select {
-	case _ = <-ack:
-		return nil
-	case _ = <-nack:
-		err = fmt.Errorf("Could not get confirmation for an AMQP message")
-		log.WithFields(log.Fields{
-			"logger":      "amqp",
-			"exchange":    exchange,
-			"routing_key": routingKey,
-			"body":        body,
-		}).Errorf("%v", err)
 		return err
 	}
 
@@ -188,8 +170,6 @@ func newAMQP(amqpURL string) (*AMQPConnection, error) {
 		}
 
 		// Setup acknowledgement
-		// despite of the false argument, it still means we want confirmation
-		channel.Confirm(false)
 		connection := &AMQPConnection{channel: channel, url: amqpURL, semaphore: &sync.WaitGroup{}, closing: false}
 		connection.monitor()
 
