@@ -61,7 +61,14 @@ func (a *AMQPConnection) Publish(exchange, routingKey, body string) error {
 
 func (a *AMQPConnection) PublishWithOptions(exchange, routingKey, body string, options Options) (err error) {
 	if a.closing {
-		return fmt.Errorf("This connection is closing, cannot publish a new message")
+		err = fmt.Errorf("Couldn't publish AMQP message: %s", err)
+		log.WithFields(log.Fields{
+			"logger":      "amqp",
+			"exchange":    exchange,
+			"routing_key": routingKey,
+			"body":        body,
+		}).Errorf("%v", err)
+		return err
 	}
 
 	// Make sure we are not in the middle of a reconnection attempt
