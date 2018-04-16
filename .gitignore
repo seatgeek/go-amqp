@@ -1,0 +1,13 @@
+vendor/**/*
+
+#Mr Developer
+.mr.developer.cfg
+.vendor
+
+# Intellij
+*.iml
+.idea
+
+.env
+.env.client
+tmp
